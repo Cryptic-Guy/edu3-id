@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edu3ID - Official Verification Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .verify-container {
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #00c853;
+            border-radius: 12px;
+        }
+
+        #status {
+            font-weight: bold;
+            color: #6200ea;
+            margin: 20px 0;
+        }
+
+        #verifiedImg {
+            max-width: 100%;
+            display: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .badge {
+            color: white;
+            background: #00c853;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="verify-container">
+        <h1>Edu3ID Verification</h1>
+        <div id="status">Verifying On-Chain Assets...</div>
+        <div id="badgeContainer" style="display:none; margin-bottom: 20px;">
+            <span class="badge">✓ Authentic Academic Record</span>
+        </div>
+        <img id="verifiedImg" alt="Decrypted Certificate">
+        <p id="collegeNote" style="margin-top:20px; font-size: 0.8em; color: #666;"></p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.umd.min.js"></script>
+    <script type="module">
+        // Use the exact same derivation logic from your main.js/encrypt.js
+        const CONTRACT_ADDRESS = "0xedE54d81fbe4D4Ed42fe45A1C89F1356f42A7821"; //
+        const ABI = ["function tokenURI(uint256 tokenId) view returns (string)"];
+
+        async function verify() {
+            const params = new URLSearchParams(window.location.search);
+            const tid = params.get('tid');
+            const key = window.location.hash.substring(1).split('=')[1]; // Get key from # fragment
+
+            if (!tid || !key) {
+                document.getElementById('status').innerText = "Invalid Verification Link";
+                return;
+            }
+
+            try {
+                // 1. Setup Provider (Use public RPC since company might not have MetaMask)
+                const provider = new ethers.JsonRpcProvider("https://rpc-amoy.polygon.technology");
+                const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
+
+                // 2. Fetch from Blockchain
+                const tokenURI = await contract.tokenURI(tid);
+                const ipfsUrl = tokenURI.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/');
+
+                // 3. Fetch and Decrypt
+                const response = await fetch(ipfsUrl);
+                const encryptedBase64 = await response.text();
+
+                // --- Insert your decryption helpers here (same as main.js) ---
+                const imageUrl = await decryptImage(encryptedBase64, key);
+
+                // 4. Show Result
+                document.getElementById('status').innerText = "Verification Successful!";
+                document.getElementById('badgeContainer').style.display = "block";
+                document.getElementById('verifiedImg').src = imageUrl;
+                document.getElementById('verifiedImg').style.display = "inline-block";
+                document.getElementById('collegeNote').innerText = "Issued by Contract: " + CONTRACT_ADDRESS;
+
+            } catch (err) {
+                document.getElementById('status').innerText = "Verification Failed or Record Expired.";
+            }
+        }
+
+        // Helper functions (Copy-pasted from your main.js to ensure compatibility)
+        async function decryptImage(base64Data, secretKey) {
+            const binary = atob(base64Data);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            const combined = bytes.buffer;
+            const iv = new Uint8Array(combined.slice(0, 12));
+            const ciphertext = combined.slice(12);
+            const key = await deriveKey(secretKey);
+            const decryptedBuffer = await window.crypto.subtle.decrypt({name: "AES-GCM", iv: iv}, key, ciphertext);
+            return URL.createObjectURL(new Blob([decryptedBuffer], {type: 'image/png'}));
+        }
+
+        async function deriveKey(secretKey) {
+            const enc = new TextEncoder();
+            const keyMaterial = await window.crypto.subtle.importKey("raw", enc.encode(secretKey), "PBKDF2", false, ["deriveKey"]);
+            return await window.crypto.subtle.deriveKey(
+                {name: "PBKDF2", salt: enc.encode("your-salt-here"), iterations: 100000, hash: "SHA-256"},
+                keyMaterial, {name: "AES-GCM", length: 256}, false, ["decrypt"]
+            );
+        }
+
+        window.onload = verify;
+    </script>
+</body>
+
+</html>

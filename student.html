@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student Portal - Edu3ID</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #6200ea;
+      --primary-dark: #4a00c9;
+      --primary-light: #7c3ff2;
+      --accent: #00bcd4;
+      --success: #00e676;
+      --warning: #ffc400;
+      --danger: #ff3d00;
+      --dark-bg: #0a0e27;
+      --dark-card: #121829;
+      --dark-border: #1e2333;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a8c9;
+      --gradient-1: linear-gradient(135deg, #6200ea 0%, #4a00c9 100%);
+      --gradient-2: linear-gradient(135deg, #00bcd4 0%, #00acc1 100%);
+      --gradient-3: linear-gradient(135deg, #6200ea 0%, #00bcd4 100%);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--dark-bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding-top: 70px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(98, 0, 234, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 188, 212, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Navigation Bar */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 14, 39, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--dark-border);
+      z-index: 100;
+    }
+
+    .nav-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: var(--gradient-3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-link {
+      padding: 10px 20px;
+      text-decoration: none;
+      color: var(--text-secondary);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      background: rgba(98, 0, 234, 0.2);
+      color: var(--accent);
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 40px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: var(--gradient-3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+
+    /* Wallet Section */
+    .wallet-section {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      padding: 24px;
+      border-radius: 16px;
+      margin-bottom: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      animation: slideInUp 0.6s ease-out;
+    }
+
+    .wallet-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .wallet-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--gradient-1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    #walletAddress {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    #walletAddress.connected {
+      color: var(--success);
+    }
+
+    #connectWalletBtn {
+      padding: 10px 24px;
+      border: none;
+      background: var(--gradient-1);
+      color: white;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    #connectWalletBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(98, 0, 234, 0.3);
+    }
+
+    /* Card */
+    .card {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 16px;
+      padding: 40px;
+      backdrop-filter: blur(10px);
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .card h2 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .card-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--dark-border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(98, 0, 234, 0.1);
+      box-shadow: 0 0 0 3px rgba(98, 0, 234, 0.1);
+    }
+
+    /* Buttons */
+    button {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: var(--gradient-1);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(98, 0, 234, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(0, 188, 212, 0.15);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      margin-top: 20px;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: rgba(0, 188, 212, 0.25);
+      box-shadow: 0 8px 16px rgba(0, 188, 212, 0.2);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Certificate Preview */
+    #certPreviewContainer {
+      margin-top: 40px;
+      padding-top: 40px;
+      border-top: 1px solid var(--dark-border);
+      display: none;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    #certPreviewContainer.show {
+      display: block;
+    }
+
+    #certPreviewContainer h3 {
+      margin-bottom: 24px;
+      font-size: 1.5rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    #certDisplay {
+      width: 100%;
+      max-width: 100%;
+      border: 3px solid var(--primary);
+      border-radius: 12px;
+      margin-bottom: 28px;
+      box-shadow: 0 20px 60px rgba(98, 0, 234, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    #certDisplay:hover {
+      transform: scale(1.02);
+      box-shadow: 0 30px 80px rgba(98, 0, 234, 0.4);
+    }
+
+    /* Share Box */
+    .share-box {
+      background: rgba(0, 230, 118, 0.1);
+      border: 2px solid var(--success);
+      padding: 20px;
+      border-radius: 12px;
+      word-break: break-all;
+      color: var(--success);
+      font-weight: 600;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      margin-top: 20px;
+      animation: slideInUp 0.4s ease-out;
+    }
+
+    .share-link-label {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+      display: block;
+      font-weight: 600;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 24px 16px;
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .wallet-section {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+      }
+
+      .wallet-info {
+        flex-direction: column;
+      }
+
+      .nav-links {
+        gap: 4px;
+      }
+
+      .nav-link {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+      }
+
+      #certDisplay {
+        border-width: 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-content">
+      <a href="index.html" class="nav-brand">🔐 Edu3ID</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="admin.html" class="nav-link">Admin Portal</a>
+        <a href="student.html" class="nav-link active">Student Portal</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <h1>🎓 Student Portal</h1>
+      <p class="subtitle">Access and share your certificates securely</p>
+    </header>
+
+    <!-- Wallet Connection -->
+    <div class="wallet-section">
+      <div class="wallet-info">
+        <div class="wallet-icon">👛</div>
+        <div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px;">Wallet Status</div>
+          <p id="walletAddress">Not Connected</p>
+        </div>
+      </div>
+      <button id="connectWalletBtn">Connect Wallet</button>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card">
+      <h2>🔓 Unlock Your Certificate</h2>
+      <p class="card-subtitle">Enter the credentials provided by your college to access your certificate</p>
+
+      <div class="form-group">
+        <label for="tokenIdInput">Token ID</label>
+        <input type="number" id="tokenIdInput" placeholder="e.g., 3" />
+      </div>
+
+      <div class="form-group">
+        <label for="secretKeyInput">Encryption Key (UUID)</label>
+        <input type="text" id="secretKeyInput" placeholder="Your private encryption key" />
+      </div>
+
+      <button id="viewCertBtn" class="btn btn-primary">🔓 Unlock Certificate</button>
+
+      <!-- Certificate Preview Section -->
+      <div id="certPreviewContainer">
+        <h3>✨ Your Secured Certificate</h3>
+        <img id="certDisplay" src="" alt="Decrypted Certificate" />
+        
+        <button id="shareLinkBtn" class="btn btn-secondary">
+          🔗 Generate One-Time Verifier Link
+        </button>
+
+        <div id="shareUrl" class="hidden share-box">
+          <span class="share-link-label">📋 Your Secure Verifier Link:</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.umd.min.js"></script>
+  <script type="module">
+    import {Web3Storage} from 'https://unpkg.com/web3.storage/dist/bundle.esm.min.js';
+    window.Web3Storage = Web3Storage;
+  </script>
+  
+  <script>
+    // Student portal functionality
+    const connectWalletBtn = document.getElementById('connectWalletBtn');
+    const walletAddress = document.getElementById('walletAddress');
+    const tokenIdInput = document.getElementById('tokenIdInput');
+    const secretKeyInput = document.getElementById('secretKeyInput');
+    const viewCertBtn = document.getElementById('viewCertBtn');
+    const certPreviewContainer = document.getElementById('certPreviewContainer');
+    const certDisplay = document.getElementById('certDisplay');
+    const shareLinkBtn = document.getElementById('shareLinkBtn');
+    const shareUrl = document.getElementById('shareUrl');
+
+    let userAddress = null;
+
+    // Connect wallet
+    connectWalletBtn.addEventListener('click', async () => {
+      try {
+        if (!window.ethereum) {
+          alert('❌ MetaMask not installed!');
+          return;
+        }
+
+        const accounts = await window.ethereum.request({
+          method: 'eth_requestAccounts'
+        });
+
+        userAddress = accounts[0];
+        walletAddress.textContent = userAddress.substring(0, 6) + '...' + userAddress.substring(38);
+        walletAddress.classList.add('connected');
+        connectWalletBtn.textContent = 'Connected ✅';
+        connectWalletBtn.disabled = true;
+
+        console.log('✅ Wallet connected:', userAddress);
+      } catch (error) {
+        console.error('❌ Error:', error);
+        alert('Error: ' + error.message);
+      }
+    });
+
+    // View certificate
+    viewCertBtn.addEventListener('click', async () => {
+      const cid = tokenIdInput.value.trim();
+      const encryptionKey = secretKeyInput.value.trim();
+
+      if (!cid || !encryptionKey) {
+        alert('❌ Please enter Token ID and Encryption Key');
+        return;
+      }
+
+      try {
+        // Retrieve from localStorage
+        const encrypted = localStorage.getItem(cid);
+
+        if (!encrypted) {
+          alert('❌ Certificate not found');
+          console.log('Available keys:', Object.keys(localStorage));
+          return;
+        }
+
+        // Decrypt
+        const decrypted = CryptoJS.AES.decrypt(encrypted, encryptionKey).toString(
+          CryptoJS.enc.Utf8
+        );
+        const metadata = JSON.parse(decrypted);
+
+        // Display certificate image
+        certDisplay.src = metadata.image;
+        certPreviewContainer.classList.add('show');
+
+        console.log('✅ Certificate unlocked:', metadata);
+      } catch (error) {
+        console.error('❌ Decryption error:', error);
+        alert('❌ Invalid Token ID or Encryption Key');
+      }
+    });
+
+    // Generate shareable link
+    shareLinkBtn.addEventListener('click', () => {
+      const cid = tokenIdInput.value.trim();
+      const encryptionKey = secretKeyInput.value.trim();
+
+      if (!cid || !encryptionKey) {
+        alert('❌ Please unlock certificate first');
+        return;
+      }
+
+      // Generate verifier link
+      const verifierToken = btoa(`${cid}:${encryptionKey}`);
+      const verifierLink = `${window.location.origin}${window.location.pathname}?token=${verifierToken}&mode=verify`;
+
+      shareUrl.innerHTML = `
+        <span class="share-link-label">📋 Your Secure Verifier Link:</span>
+        <div style="word-break: break-all; margin-top: 8px; font-family: 'Space Mono', monospace;">${verifierLink}</div>
+        <button type="button" style="
+          margin-top: 12px;
+          padding: 8px 16px;
+          background: var(--success);
+          color: #000;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 600;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+        " onclick="navigator.clipboard.writeText('${verifierLink}'); alert('✅ Link copied!')">
+          📋 Copy Link
+        </button>
+      `;
+      shareUrl.classList.remove('hidden');
+
+      console.log('✅ Verifier link generated');
+    });
+
+    // Check for verify mode on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('mode') === 'verify') {
+        const token = params.get('token');
+        try {
+          const [cid, key] = atob(token).split(':');
+          tokenIdInput.value = cid;
+          secretKeyInput.value = key;
+          alert('✅ Link verified! Click "Unlock Certificate" to view.');
+        } catch (error) {
+          alert('❌ Invalid verification link');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

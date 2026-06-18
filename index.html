@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Decentralized Credential Vault</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #6200ea;
+      --primary-dark: #4a00c9;
+      --primary-light: #7c3ff2;
+      --accent: #00bcd4;
+      --success: #00e676;
+      --warning: #ffc400;
+      --danger: #ff3d00;
+      --dark-bg: #0a0e27;
+      --dark-card: #121829;
+      --dark-border: #1e2333;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a8c9;
+      --gradient-1: linear-gradient(135deg, #6200ea 0%, #4a00c9 100%);
+      --gradient-2: linear-gradient(135deg, #00bcd4 0%, #00acc1 100%);
+      --gradient-3: linear-gradient(135deg, #6200ea 0%, #00bcd4 100%);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--dark-bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(98, 0, 234, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 188, 212, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      background: var(--gradient-3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    /* Wallet Connection Section */
+    .wallet-section {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      padding: 28px;
+      border-radius: 16px;
+      margin-bottom: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      animation: slideInUp 0.8s ease-out;
+    }
+
+    .wallet-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .wallet-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--gradient-1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    #walletAddress {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+
+    #walletAddress.connected {
+      color: var(--success);
+    }
+
+    #connectWalletBtn {
+      padding: 12px 32px;
+      border: none;
+      background: var(--gradient-1);
+      color: white;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    #connectWalletBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(98, 0, 234, 0.3);
+    }
+
+    #connectWalletBtn:active {
+      transform: translateY(0);
+    }
+
+    /* Grid Layout for Sections */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 968px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 16px;
+      padding: 32px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .card:hover {
+      border-color: var(--primary-light);
+      box-shadow: 0 20px 40px rgba(98, 0, 234, 0.15);
+    }
+
+    .card h2 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .card-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="file"] {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--dark-border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="file"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(98, 0, 234, 0.1);
+      box-shadow: 0 0 0 3px rgba(98, 0, 234, 0.1);
+    }
+
+    input[type="file"]::file-selector-button {
+      background: var(--gradient-1);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-right: 12px;
+      transition: all 0.3s ease;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(98, 0, 234, 0.2);
+    }
+
+    /* Buttons */
+    button {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: var(--gradient-1);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(98, 0, 234, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(0, 188, 212, 0.15);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: rgba(0, 188, 212, 0.25);
+      box-shadow: 0 8px 16px rgba(0, 188, 212, 0.2);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Status Messages */
+    #uploadStatus {
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin: 16px 0;
+      font-size: 0.95rem;
+      animation: slideInUp 0.4s ease-out;
+    }
+
+    .status-success {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .status-error {
+      background: rgba(255, 61, 0, 0.15);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+
+    .status-loading {
+      background: rgba(98, 0, 234, 0.15);
+      color: var(--primary-light);
+      border: 1px solid var(--primary-light);
+    }
+
+    /* Certificate Preview */
+    #certPreviewContainer {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--dark-border);
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    #certPreviewContainer h3 {
+      margin-bottom: 16px;
+      font-size: 1.3rem;
+      color: var(--accent);
+    }
+
+    #certDisplay {
+      width: 100%;
+      max-width: 100%;
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 20px 40px rgba(98, 0, 234, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    #certDisplay:hover {
+      transform: scale(1.02);
+      box-shadow: 0 30px 60px rgba(98, 0, 234, 0.3);
+    }
+
+    /* Share Box */
+    .share-box {
+      background: rgba(0, 230, 118, 0.1);
+      border: 2px solid var(--success);
+      padding: 16px;
+      border-radius: 10px;
+      word-break: break-all;
+      color: var(--success);
+      font-weight: 600;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      margin-top: 16px;
+      animation: slideInUp 0.4s ease-out;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Step Indicator */
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 12px;
+      background: rgba(98, 0, 234, 0.1);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .step-number {
+      width: 28px;
+      height: 28px;
+      background: var(--gradient-1);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+
+      .wallet-section {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+      }
+
+      .wallet-info {
+        flex-direction: column;
+      }
+
+      .container {
+        padding: 24px 16px;
+      }
+
+      .card {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔐 Edu3ID</h1>
+      <p class="subtitle">Decentralized Credential Vault Protocol</p>
+    </header>
+
+    <div class="wallet-section">
+      <div class="wallet-info">
+        <div class="wallet-icon">👛</div>
+        <div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px;">Wallet Status</div>
+          <p id="walletAddress">Not Connected</p>
+        </div>
+      </div>
+      <button id="connectWalletBtn">Connect Wallet</button>
+    </div>
+
+    <div class="content-grid">
+      <!-- Admin Section -->
+      <div class="card" id="adminSection">
+        <h2>📜 Issue Certificate</h2>
+        <p class="card-subtitle">College Administrator Portal</p>
+
+        <div class="step-indicator">
+          <div class="step-number">1</div>
+          <span>Encrypt & Upload to IPFS</span>
+        </div>
+
+        <form id="certificateForm">
+          <div class="form-group">
+            <label for="studentName">Student Name</label>
+            <input type="text" id="studentName" placeholder="e.g., John Doe" required />
+          </div>
+
+          <div class="form-group">
+            <label for="studentGR">Student GR (Roll Number)</label>
+            <input type="text" id="studentGR" placeholder="e.g., 21B0012" required />
+          </div>
+
+          <div class="form-group">
+            <label for="branch">Branch</label>
+            <input type="text" id="branch" placeholder="e.g., Computer Science" required />
+          </div>
+
+          <div class="form-group">
+            <label for="courseName">Course Name</label>
+            <input type="text" id="courseName" placeholder="e.g., B.Tech Computer Science" required />
+          </div>
+
+          <div class="form-group">
+            <label for="certificateImage">Certificate Image</label>
+            <input type="file" id="certificateImage" accept="image/*" required />
+          </div>
+
+          <button type="submit" class="btn btn-primary">🚀 Encrypt & Upload to IPFS</button>
+        </form>
+
+        <div id="uploadStatus"></div>
+
+        <div class="step-indicator" style="margin-top: 24px;">
+          <div class="step-number">2</div>
+          <span>Mint As NFT on Blockchain</span>
+        </div>
+
+        <button type="button" id="mintNFTBtn" class="btn btn-secondary" disabled style="margin-top: 12px;">
+          ⛓️ Mint As NFT (College Registry)
+        </button>
+      </div>
+
+      <!-- Student Section -->
+      <div class="card" id="studentSection">
+        <h2>🎓 Access & Share</h2>
+        <p class="card-subtitle">Student Credentials Portal</p>
+
+        <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 0.95rem;">
+          Enter the credentials provided by your college to unlock and share your certificate.
+        </p>
+
+        <div class="form-group">
+          <label for="tokenIdInput">Token ID</label>
+          <input type="number" id="tokenIdInput" placeholder="e.g., 3" />
+        </div>
+
+        <div class="form-group">
+          <label for="secretKeyInput">Encryption Key (UUID)</label>
+          <input type="text" id="secretKeyInput" placeholder="Your private encryption key" />
+        </div>
+
+        <button id="viewCertBtn" class="btn btn-primary">🔓 Unlock Certificate</button>
+
+        <div id="certPreviewContainer" class="hidden">
+          <h3>✨ Your Secured Certificate</h3>
+          <img id="certDisplay" src="" alt="Decrypted Certificate" />
+          
+          <button id="shareLinkBtn" class="btn btn-secondary" style="margin-top: 16px;">
+            🔗 Generate One-Time Verifier Link
+          </button>
+
+          <div id="shareUrl" class="hidden share-box"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.umd.min.js"></script>
+  <script type="module">
+    import {Web3Storage} from 'https://unpkg.com/web3.storage/dist/bundle.esm.min.js';
+    window.Web3Storage = Web3Storage;
+  </script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

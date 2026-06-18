@@ -1,0 +1,22 @@
+body {
+  font-family: Arial, sans-serif;
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+button {
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}
+input,
+label,
+textarea {
+  display: block;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+#walletAddress span.address {
+  font-family: monospace;
+  color: #2a7ae2;
+  font-weight: bold;
+}
